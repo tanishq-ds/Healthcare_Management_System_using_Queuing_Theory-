@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+test_env/          
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Environment variables (CRITICAL - NEVER COMMIT!)
+.env
+.env.local
+.env.*.local
+
+# Data files (link to Kaggle instead)
+*.csv
+*.xlsx
+*.xls
+data/raw/*.csv
+data/raw/*.xlsx
+
+# Trained models (if too large)
+models/saved/*.pkl
+models/saved/*.joblib
+models/saved/*.h5
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Track Readme files
+!README.md
+!**/README.md

@@ -1,0 +1,36 @@
+
+MODEL PERFORMANCE SUMMARY
+========================
+
+Dataset:
+- Total samples: 6962
+- Training samples: 5569
+- Testing samples: 1393
+- Features: 16
+- Classes: 6
+
+Class Distribution:
+Ward Type
+General Ward          2042
+Endocrinology Ward    1975
+Cardiac Ward           874
+Cardiology Ward        451
+Emergency Ward         124
+ICU                    103
+Name: count, dtype: int64
+
+Model Results:
+--------------
+Random Forest:
+- Accuracy: 0.9943
+- Precision: 0.9943
+- Recall: 0.9943
+- F1-Score: 0.9942
+
+XGBoost:
+- Accuracy: 0.9957
+- Precision: 0.9958
+- Recall: 0.9957
+- F1-Score: 0.9957
+
+Winner: XGBoost (slightly better overall accuracy)

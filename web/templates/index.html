@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System - AI-Powered Patient Care</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <!-- Plotly for Charts -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1a2332",
+                        "accent": "#00d9ff",
+                        "bg-light": "#f8f9fa",
+                        "bg-dark": "#0d1117",
+                        "success": "#00ff88",
+                        "warning": "#ff6b35",
+                        "critical": "#ff3860",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "system-ui", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-field {
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
+            background: #f8f9fa;
+            transition: all 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: #00d9ff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d9ff, #00b8cc);
+            border-radius: 12px;
+            padding: 16px 32px;
+            color: white;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+
+    <!-- ==================== FIXED NAVIGATION ==================== -->
+    <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 bg-primary/90 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-10">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-accent p-2 rounded-lg">
+                            <span class="material-symbols-outlined text-white text-2xl">medical_services</span>
+                        </div>
+                        <h1 class="text-white text-xl font-bold">Hospital Management System</h1>
+                    </div>
+                    <div class="hidden md:flex items-center gap-6">
+                        <a href="#dashboard"
+                            class="nav-link text-white text-sm font-medium hover:text-accent transition-colors">Dashboard</a>
+                        <a href="#admit-patient"
+                            class="nav-link text-slate-300 text-sm font-medium hover:text-white transition-colors">Admit
+                            Patient</a>
+                        <a href="#queue-analytics"
+                            class="nav-link text-slate-300 text-sm font-medium hover:text-white transition-colors">Queue</a>
+                        <a href="#patient-records"
+                            class="nav-link text-slate-300 text-sm font-medium hover:text-white transition-colors">Records</a>
+                        <a href="#system-stats"
+                            class="nav-link text-slate-300 text-sm font-medium hover:text-white transition-colors">Stats</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative hidden sm:block">
+                        <span
+                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+                        <input
+                            class="bg-white/10 border-none rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-slate-400 focus:ring-1 focus:ring-accent w-64"
+                            placeholder="Search..." type="text">
+                    </div>
+                    <div
+                        class="h-10 w-10 rounded-full bg-slate-700 border border-white/20 flex items-center justify-center cursor-pointer hover:border-accent transition-colors">
+                        <span class="material-symbols-outlined text-white">person</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ==================== SECTION 1: HERO DASHBOARD ==================== -->
+    <section id="dashboard" class="pt-24 pb-16 px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Hero Banner -->
+            <div
+                class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-[#243347] to-primary p-12 lg:p-16 mb-12 border border-white/5 shadow-2xl">
+                <div class="relative z-10 max-w-3xl">
+                    <div
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-bold uppercase tracking-wider mb-6">
+                        <span class="relative flex h-2 w-2">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                        </span>
+                        System Online
+                    </div>
+                    <h2 class="text-white text-5xl lg:text-6xl font-black leading-tight mb-4">
+                        Hospital Management <span class="text-accent">System</span>
+                    </h2>
+                    <p class="text-slate-300 text-xl font-normal leading-relaxed mb-8">
+                        AI-Powered Patient Queuing & Resource Optimization
+                    </p>
+                    <div class="flex items-center gap-4 text-sm text-white/80 mb-8">
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-accent">check_circle</span>
+                            99.57% ML Accuracy
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-accent">hotel</span>
+                            224 Beds
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-accent">analytics</span>
+                            Real-Time Analytics
+                        </span>
+                    </div>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#admit-patient" class="btn-primary inline-flex items-center gap-2">
+                            <span class="material-symbols-outlined">add_circle</span>
+                            Admit Patient
+                        </a>
+                        <a href="#queue-analytics"
+                            class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-8 py-4 rounded-xl transition-all">
+                            View Analytics
+                        </a>
+                    </div>
+                </div>
+                <div class="absolute top-0 right-0 w-1/2 h-full opacity-20 hidden lg:block">
+                    <div
+                        class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-accent/40 via-transparent to-transparent">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <!-- ML Accuracy -->
+                <div class="card">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-slate-500 text-sm font-semibold">ML Accuracy</p>
+                        <span class="bg-green-100 text-green-600 text-xs font-bold px-2 py-1 rounded">+0.2%</span>
+                    </div>
+                    <p id="ml-accuracy-display" class="text-slate-900 text-4xl font-bold mb-4">99.57%</p>
+                    <div class="h-12 flex items-end gap-1">
+                        <div class="flex-1 bg-accent/20 rounded-t h-3/5"></div>
+                        <div class="flex-1 bg-accent/30 rounded-t h-4/5"></div>
+                        <div class="flex-1 bg-accent/40 rounded-t h-3/4"></div>
+                        <div class="flex-1 bg-accent/50 rounded-t h-4/5"></div>
+                        <div class="flex-1 bg-accent/60 rounded-t h-5/6"></div>
+                        <div class="flex-1 bg-accent rounded-t h-full"></div>
+                    </div>
+                </div>
+
+                <!-- Total Beds -->
+                <div class="card">
+                    <p class="text-slate-500 text-sm font-semibold mb-2">Bed Availability</p>
+                    <div class="flex items-end gap-2 mb-4">
+                        <p id="total-beds-display" class="text-slate-900 text-4xl font-bold">224</p>
+                        <p class="text-green-500 text-sm font-medium pb-1">Available</p>
+                    </div>
+                    <div class="grid grid-cols-8 gap-1">
+                        <div class="h-2 rounded-full bg-accent"></div>
+                        <div class="h-2 rounded-full bg-accent"></div>
+                        <div class="h-2 rounded-full bg-accent"></div>
+                        <div class="h-2 rounded-full bg-slate-200"></div>
+                        <div class="h-2 rounded-full bg-accent"></div>
+                        <div class="h-2 rounded-full bg-accent"></div>
+                        <div class="h-2 rounded-full bg-slate-200"></div>
+                        <div class="h-2 rounded-full bg-slate-200"></div>
+                    </div>
+                </div>
+
+                <!-- Queue Count -->
+                <div class="card">
+                    <p class="text-slate-500 text-sm font-semibold mb-2">Current Queue</p>
+                    <p id="queue-count-display" class="text-slate-900 text-4xl font-bold mb-2">--</p>
+                    <div class="flex items-center gap-2">
+                        <div class="flex -space-x-2">
+                            <div class="w-6 h-6 rounded-full border-2 border-white bg-slate-300"></div>
+                            <div class="w-6 h-6 rounded-full border-2 border-white bg-slate-400"></div>
+                            <div class="w-6 h-6 rounded-full border-2 border-white bg-slate-500"></div>
+                        </div>
+                        <p class="text-slate-400 text-xs">Patients waiting</p>
+                    </div>
+                </div>
+
+                <!-- System Efficiency -->
+                <div class="card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-semibold mb-2">System Efficiency</p>
+                            <p id="efficiency-display" class="text-slate-900 text-4xl font-bold">95.3%</p>
+                        </div>
+                        <div class="relative w-16 h-16">
+                            <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                                <circle class="stroke-slate-100" cx="18" cy="18" r="16" fill="none" stroke-width="3">
+                                </circle>
+                                <circle class="stroke-accent" cx="18" cy="18" r="16" fill="none" stroke-width="3"
+                                    stroke-dasharray="100" stroke-dashoffset="4.7" stroke-linecap="round"></circle>
+                            </svg>
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                <span class="material-symbols-outlined text-accent text-lg">bolt</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <h3 class="text-slate-900 text-xl font-bold mb-6">Quick Actions</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="#admit-patient"
+                    class="card cursor-pointer group hover:border-accent hover:border transition-all">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-2xl">person_add</span>
+                    </div>
+                    <h4 class="text-slate-900 font-bold mb-2">Admit Patient</h4>
+                    <p class="text-slate-500 text-sm">Register new patient with ML-based ward assignment</p>
+                </a>
+                <a href="#queue-analytics"
+                    class="card cursor-pointer group hover:border-accent hover:border transition-all">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-2xl">analytics</span>
+                    </div>
+                    <h4 class="text-slate-900 font-bold mb-2">View Queue</h4>
+                    <p class="text-slate-500 text-sm">Real-time queue analytics and priority management</p>
+                </a>
+                <a href="#patient-records"
+                    class="card cursor-pointer group hover:border-accent hover:border transition-all">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-primary/5 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-2xl">folder_open</span>
+                    </div>
+                    <h4 class="text-slate-900 font-bold mb-2">Search Records</h4>
+                    <p class="text-slate-500 text-sm">Access patient database and medical histories</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 2: PATIENT ADMISSION FORM ==================== -->
+    <section id="admit-patient" class="py-16 px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-8">
+                <h2 class="text-4xl font-black text-slate-900 mb-2">Patient Admission</h2>
+                <p class="text-slate-600">ML-powered ward allocation and priority assessment</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- LEFT: Admission Form (70%) -->
+                <div class="lg:col-span-7">
+                    <form id="patient-admission-form" class="space-y-6">
+
+                        <!-- Personal Information -->
+                        <div class="card">
+                            <div class="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
+                                <span class="material-symbols-outlined text-accent">person</span>
+                                <h3 class="text-lg font-bold text-slate-800">Personal Information</h3>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="md:col-span-2">
+                                    <label
+                                        class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Full
+                                        Name *</label>
+                                    <input id="patient-name-input" data-bind="patient.name" class="input-field w-full"
+                                        placeholder="John Doe" type="text" required>
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Age
+                                        *</label>
+                                    <input id="patient-age-input" data-bind="patient.age" class="input-field w-full"
+                                        placeholder="Years" type="number" min="0" max="120" required>
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label
+                                        class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Gender
+                                        *</label>
+                                    <select id="patient-gender-select" data-bind="patient.gender"
+                                        class="input-field w-full" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medical Data -->
+                        <div class="card">
+                            <div class="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
+                                <span class="material-symbols-outlined text-accent">vital_signs</span>
+                                <h3 class="text-lg font-bold text-slate-800">Medical Data (16 Features)</h3>
+                            </div>
+
+                            <!-- Triage Level -->
+                            <div class="mb-6">
+                                <label
+                                    class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Triage
+                                    Level *</label>
+                                <select id="triage-level-select" data-bind="patient.triage" class="input-field w-full"
+                                    required>
+                                    <option value="">Select Triage Level</option>
+                                    <option value="red">Red (Life-threatening)</option>
+                                    <option value="orange">Orange (Emergent)</option>
+                                    <option value="yellow">Yellow (Urgent)</option>
+                                    <option value="green">Green (Non-urgent)</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <!-- Field 1: Blood Pressure -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">Blood Pressure
+                                        (Systolic) *</label>
+                                    <input id="blood-pressure-input" data-bind="patient.blood_pressure"
+                                        class="input-field w-full" placeholder="mmHg" type="number" required>
+                                </div>
+
+                                <!-- Field 2: Cholesterol -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">Cholesterol *</label>
+                                    <input id="cholesterol-input" data-bind="patient.cholesterol"
+                                        class="input-field w-full" placeholder="mg/dL" type="number" required>
+                                </div>
+
+                                <!-- Field 3: Heart Rate -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">Max Heart Rate
+                                        *</label>
+                                    <input id="heart-rate-input" data-bind="patient.max_heart_rate"
+                                        class="input-field w-full" placeholder="BPM" type="number" required>
+                                </div>
+
+                                <!-- Field 4: Chest Pain Type -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">Chest Pain Type
+                                        *</label>
+                                    <select id="chest-pain-select" data-bind="patient.chest_pain_type"
+                                        class="input-field w-full" required>
+                                        <option value="">Select Type</option>
+                                        <option value="1">Type 1 (Typical Angina)</option>
+                                        <option value="2">Type 2 (Atypical Angina)</option>
+                                        <option value="3">Type 3 (Non-anginal Pain)</option>
+                                        <option value="4">Type 4 (Asymptomatic)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Field 5: Exercise Angina -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">Exercise Angina
+                                        *</label>
+                                    <select id="exercise-angina-toggle" data-bind="patient.exercise_angina"
+                                        class="input-field w-full" required>
+                                        <option value="">Select</option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                    </select>
+                                </div>
+
+                                <!-- Field 6: Plasma Glucose -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">Plasma Glucose
+                                        *</label>
+                                    <input id="glucose-input" data-bind="patient.plasma_glucose"
+                                        class="input-field w-full" placeholder="mg/dL" type="number" required>
+                                </div>
+
+                                <!-- Field 7: Skin Thickness -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">Skin Thickness
+                                        *</label>
+                                    <input id="skin-thickness-input" data-bind="patient.skin_thickness"
+                                        class="input-field w-full" placeholder="mm" type="number" required>
+                                </div>
+
+                                <!-- Field 8: Insulin -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">Insulin Level
+                                        *</label>
+                                    <input id="insulin-input" data-bind="patient.insulin" class="input-field w-full"
+                                        placeholder="μU/mL" type="number" required>
+                                </div>
+
+                                <!-- Field 9: BMI -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">BMI *</label>
+                                    <input id="bmi-input" data-bind="patient.bmi" class="input-field w-full"
+                                        placeholder="kg/m²" type="number" step="0.1" required>
+                                </div>
+
+                                <!-- Field 10: Diabetes Pedigree -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">Diabetes Pedigree
+                                        Function *</label>
+                                    <input id="diabetes-pedigree-input" data-bind="patient.diabetes_pedigree"
+                                        class="input-field w-full" placeholder="0.0 - 2.5" type="number" step="0.01"
+                                        required>
+                                </div>
+
+                                <!-- Field 11: Smoking Status -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">Smoking Status
+                                        *</label>
+                                    <select id="smoking-status-select" data-bind="patient.smoking_status"
+                                        class="input-field w-full" required>
+                                        <option value="">Select</option>
+                                        <option value="never">Never Smoked</option>
+                                        <option value="former">Former Smoker</option>
+                                        <option value="current">Current Smoker</option>
+                                    </select>
+                                </div>
+
+                                <!-- Field 12: Residence Type -->
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">Residence Type
+                                        *</label>
+                                    <select id="residence-type-select" data-bind="patient.residence_type"
+                                        class="input-field w-full" required>
+                                        <option value="">Select</option>
+                                        <option value="Urban">Urban</option>
+                                        <option value="Rural">Rural</option>
+                                    </select>
+                                </div>
+
+                                <!-- Field 13: Hypertension (Checkbox) -->
+                                <div class="flex items-center gap-3 pt-6">
+                                    <input id="hypertension-checkbox" data-bind="patient.hypertension" type="checkbox"
+                                        class="w-5 h-5 text-accent border-slate-300 rounded focus:ring-accent">
+                                    <label for="hypertension-checkbox"
+                                        class="text-sm font-semibold text-slate-700">Hypertension</label>
+                                </div>
+
+                                <!-- Field 14: Heart Disease (Checkbox) -->
+                                <div class="flex items-center gap-3 pt-6">
+                                    <input id="heart-disease-checkbox" data-bind="patient.heart_disease" type="checkbox"
+                                        class="w-5 h-5 text-accent border-slate-300 rounded focus:ring-accent">
+                                    <label for="heart-disease-checkbox"
+                                        class="text-sm font-semibold text-slate-700">Heart Disease</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button id="submit-prediction-btn" data-action="predict-ward" data-endpoint="/api/predict-ward"
+                            data-method="POST" data-target="#prediction-results-panel" type="submit"
+                            class="w-full btn-primary flex items-center justify-center gap-2 text-lg">
+                            <span class="material-symbols-outlined">analytics</span>
+                            <span id="submit-btn-text">Predict Ward & Assign Queue</span>
+                            <span id="submit-btn-loader" class="hidden">
+                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                            </span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- RIGHT: Results Panel (30%) -->
+                <div class="lg:col-span-5">
+                    <div class="sticky top-24">
+                        <div id="prediction-results-panel" class="card">
+                            <div class="flex items-center justify-between mb-8">
+                                <h3 class="text-xl font-bold text-slate-800">Prediction Results</h3>
+                                <span id="result-status-badge"
+                                    class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">PENDING</span>
+                            </div>
+
+                            <!-- Empty State -->
+                            <div id="empty-state" class="space-y-6">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                                            Predicted Ward</p>
+                                        <div class="h-8 w-48 mt-2 bg-slate-100 rounded-lg skeleton"></div>
+                                    </div>
+                                    <span class="material-symbols-outlined text-4xl text-slate-200">hotel</span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-6">
+                                    <!-- Confidence -->
+                                    <div class="text-center">
+                                        <p class="text-xs font-semibold text-slate-400 uppercase mb-4">Confidence</p>
+                                        <div class="relative flex items-center justify-center mx-auto w-24 h-24">
+                                            <svg class="w-full h-full transform -rotate-90">
+                                                <circle class="text-slate-100" cx="48" cy="48" r="40" fill="transparent"
+                                                    stroke="currentColor" stroke-width="8"></circle>
+                                            </svg>
+                                            <div
+                                                class="absolute inset-0 flex items-center justify-center text-xl font-bold text-slate-300">
+                                                --%</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Priority -->
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-400 uppercase mb-4">Priority Score
+                                        </p>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between text-xs font-bold text-slate-400">
+                                                <span>Low</span>
+                                                <span>Critical</span>
+                                            </div>
+                                            <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                                                <div
+                                                    class="h-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 w-0">
+                                                </div>
+                                            </div>
+                                            <p class="text-center text-2xl font-black text-slate-200">0/10</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Queue Info -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="rounded-xl bg-slate-50 p-4">
+                                        <p class="text-xs font-medium text-slate-500 mb-1">Queue Position</p>
+                                        <p class="text-2xl font-bold text-slate-300">--</p>
+                                    </div>
+                                    <div class="rounded-xl bg-slate-50 p-4">
+                                        <p class="text-xs font-medium text-slate-500 mb-1">Wait Time</p>
+                                        <p class="text-2xl font-bold text-slate-300">-- min</p>
+                                    </div>
+                                </div>
+
+                                <div class="rounded-xl border-2 border-dashed border-slate-200 p-6 text-center">
+                                    <span class="material-symbols-outlined text-4xl text-slate-200 mb-2">insights</span>
+                                    <p class="text-sm text-slate-400">Complete the form and submit to get ML prediction
+                                        results</p>
+                                </div>
+                            </div>
+
+                            <!-- Results State (Hidden initially) -->
+                            <div id="results-state" class="hidden space-y-6">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
+                                            Predicted Ward</p>
+                                        <p id="predicted-ward-display" data-bind="result.ward"
+                                            class="text-2xl font-bold text-slate-900">--</p>
+                                        <p id="bed-number-display" data-bind="result.bed_number"
+                                            class="text-sm text-slate-500 mt-1">Bed: --</p>
+                                    </div>
+                                    <span class="material-symbols-outlined text-4xl text-accent">hotel</span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-6">
+                                    <!-- Confidence Score -->
+                                    <div class="text-center">
+                                        <p class="text-xs font-semibold text-slate-400 uppercase mb-4">Confidence</p>
+                                        <div class="relative flex items-center justify-center mx-auto w-24 h-24">
+                                            <svg class="w-full h-full transform -rotate-90">
+                                                <circle class="text-slate-100" cx="48" cy="48" r="40" fill="transparent"
+                                                    stroke="currentColor" stroke-width="8"></circle>
+                                                <circle id="confidence-circle" class="text-accent" cx="48" cy="48"
+                                                    r="40" fill="transparent" stroke="currentColor" stroke-width="8"
+                                                    stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                                            </svg>
+                                            <div id="confidence-score-display" data-bind="result.confidence"
+                                                data-format="percentage"
+                                                class="absolute inset-0 flex items-center justify-center text-xl font-bold text-slate-900">
+                                                --%</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Priority Score -->
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-400 uppercase mb-4">Priority Score
+                                        </p>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between text-xs font-bold text-slate-400">
+                                                <span>Low</span>
+                                                <span>Critical</span>
+                                            </div>
+                                            <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                                                <div id="priority-bar"
+                                                    class="h-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-500 transition-all duration-500"
+                                                    style="width: 0%"></div>
+                                            </div>
+                                            <p id="priority-score-display" data-bind="result.priority_score"
+                                                class="text-center text-2xl font-black text-slate-900">0/10</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Queue Info -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="rounded-xl bg-accent/5 p-4 border border-accent/20">
+                                        <p class="text-xs font-medium text-slate-500 mb-1">Queue Position</p>
+                                        <p id="queue-position-display" data-bind="result.queue_position"
+                                            class="text-2xl font-bold text-accent">--</p>
+                                    </div>
+                                    <div class="rounded-xl bg-accent/5 p-4 border border-accent/20">
+                                        <p class="text-xs font-medium text-slate-500 mb-1">Wait Time</p>
+                                        <p id="estimated-wait-display" data-bind="result.estimated_wait"
+                                            class="text-2xl font-bold text-accent">-- min</p>
+                                    </div>
+                                </div>
+
+                                <button id="confirm-admission-btn"
+                                    class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition-all">
+                                    Confirm Admission
+                                </button>
+
+                                <button onclick="resetForm()"
+                                    class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-all">
+                                    Try Another Patient
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 3: QUEUE ANALYTICS ==================== -->
+    <section id="queue-analytics" class="py-16 px-6 lg:px-8 bg-slate-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h2 class="text-4xl font-black text-slate-900 mb-2">Queue Analytics Dashboard</h2>
+                    <p class="text-slate-600">Real-time patient queue visualization and metrics</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <select id="ward-filter-select" data-bind="filters.ward" class="input-field">
+                        <option value="all">All Wards</option>
+                        <option value="ICU">ICU</option>
+                        <option value="Cardiac Ward">Cardiac Ward</option>
+                        <option value="Cardiology Ward">Cardiology Ward</option>
+                        <option value="Endocrinology Ward">Endocrinology Ward</option>
+                        <option value="Emergency Ward">Emergency Ward</option>
+                        <option value="General Ward">General Ward</option>
+                    </select>
+                    <button id="apply-filters-btn" data-action="filter-queue" class="btn-primary">Apply</button>
+                </div>
+            </div>
+
+            <!-- Metrics Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="card">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Avg Wait Time</p>
+                    <p id="queue-metrics-avg-wait" data-bind="metrics.avg_wait"
+                        class="text-3xl font-bold text-slate-900">32.5 min</p>
+                </div>
+                <div class="card">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Critical Response</p>
+                    <p id="queue-metrics-critical" data-bind="metrics.critical_response"
+                        class="text-3xl font-bold text-green-500 flex items-center gap-2">
+                        &lt;5 min
+                        <span class="material-symbols-outlined text-2xl">check_circle</span>
+                    </p>
+                </div>
+                <div class="card">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">System Efficiency</p>
+                    <p id="queue-metrics-efficiency" data-bind="metrics.efficiency"
+                        class="text-3xl font-bold text-slate-900">95.3%</p>
+                </div>
+                <div class="card">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Fairness Index</p>
+                    <p id="queue-metrics-fairness" data-bind="metrics.fairness"
+                        class="text-3xl font-bold text-slate-900">0.89/1.0</p>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Chart 1: Priority Distribution -->
+                <div class="card">
+                    <h4 class="text-lg font-bold text-slate-800 mb-4">Priority Score Distribution</h4>
+                    <div id="priority-chart-container" data-chart="plotly" data-source="/api/queue-analytics"
+                        data-chart-type="bar" class="h-80"></div>
+                </div>
+
+                <!-- Chart 2: Wait Time vs Priority -->
+                <div class="card">
+                    <h4 class="text-lg font-bold text-slate-800 mb-4">Wait Time vs Priority</h4>
+                    <div id="waittime-chart-container" data-chart="plotly" data-source="/api/queue-analytics"
+                        data-chart-type="scatter" class="h-80"></div>
+                </div>
+
+                <!-- Chart 3: Queue by Ward -->
+                <div class="card">
+                    <h4 class="text-lg font-bold text-slate-800 mb-4">Queue Length by Ward</h4>
+                    <div id="wardqueue-chart-container" data-chart="plotly" data-source="/api/queue-analytics"
+                        data-chart-type="bar" class="h-80"></div>
+                </div>
+
+                <!-- Chart 4: Priority Categories -->
+                <div class="card">
+                    <h4 class="text-lg font-bold text-slate-800 mb-4">Patients by Priority Category</h4>
+                    <div id="category-chart-container" data-chart="plotly" data-source="/api/queue-analytics"
+                        data-chart-type="pie" class="h-80"></div>
+                </div>
+            </div>
+
+            <!-- Live Queue Table -->
+            <div class="card">
+                <div class="flex items-center justify-between mb-6">
+                    <h4 class="text-lg font-bold text-slate-800">Live Patient Queue</h4>
+                    <div class="flex items-center gap-2">
+                        <span class="relative flex h-3 w-3">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                        <span class="text-sm text-slate-500">Auto-refresh: 30s</span>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="live-queue-table" data-source="/api/queue-status" data-refresh="30000" class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-200">
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Patient
+                                    ID</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Ward</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Priority
+                                </th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Position
+                                </th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Wait Time
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="queue-table-body">
+                            <tr>
+                                <td colspan="5" class="text-center py-8 text-slate-400">Loading queue data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 4: PATIENT RECORDS ==================== -->
+    <section id="patient-records" class="py-16 px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-8">
+                <h2 class="text-4xl font-black text-slate-900 mb-2">Patient Records Browser</h2>
+                <p class="text-slate-600">Search and view patient medical histories</p>
+            </div>
+
+            <!-- Search & Filter Bar -->
+            <div class="card mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-500 mb-2">Search Patient</label>
+                        <input id="patient-search-input" data-bind="filters.search" class="input-field w-full"
+                            placeholder="Name or Patient ID..." type="text">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-2">Ward Filter</label>
+                        <select id="patient-ward-filter" data-bind="filters.ward" class="input-field w-full">
+                            <option value="all">All Wards</option>
+                            <option value="ICU">ICU</option>
+                            <option value="Cardiac Ward">Cardiac Ward</option>
+                            <option value="Cardiology Ward">Cardiology Ward</option>
+                            <option value="Endocrinology Ward">Endocrinology Ward</option>
+                            <option value="Emergency Ward">Emergency Ward</option>
+                            <option value="General Ward">General Ward</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-2">Status Filter</label>
+                        <select id="patient-status-filter" data-bind="filters.status" class="input-field w-full">
+                            <option value="all">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Discharged">Discharged</option>
+                            <option value="In Treatment">In Treatment</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
+                    <button id="apply-search-btn" data-action="search-patients" data-endpoint="/api/patients"
+                        class="btn-primary">
+                        <span class="material-symbols-outlined">search</span>
+                        Search
+                    </button>
+                    <button id="export-records-btn"
+                        class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-3 rounded-xl transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined">download</span>
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Patient Records Table -->
+            <div class="card">
+                <div class="overflow-x-auto">
+                    <table id="patient-records-table" data-source="/api/patients" data-pagination="50" class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-200">
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Patient
+                                    ID</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Name</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Age</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Ward</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Bed</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Admission
+                                    Date</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Status
+                                </th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="patient-table-body">
+                            <tr>
+                                <td colspan="8" class="text-center py-8 text-slate-400">No patients found. Use search
+                                    filters above.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Patient Detail Modal (Hidden) -->
+            <div id="patient-detail-modal"
+                class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-2xl font-bold text-slate-900">Patient Details</h3>
+                            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600">
+                                <span class="material-symbols-outlined text-3xl">close</span>
+                            </button>
+                        </div>
+                        <div id="modal-content" class="space-y-6">
+                            <!-- Dynamic content will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SECTION 5: SYSTEM STATS ==================== -->
+    <section id="system-stats" class="py-16 px-6 lg:px-8 bg-slate-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-8">
+                <h2 class="text-4xl font-black text-slate-900 mb-2">System Performance Statistics</h2>
+                <p class="text-slate-600">ML model metrics, database stats, and queue efficiency</p>
+            </div>
+
+            <!-- ML Model Performance -->
+            <div class="card mb-6">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                    <span class="material-symbols-outlined text-accent text-3xl">psychology</span>
+                    <h3 class="text-2xl font-bold text-slate-800">Machine Learning Performance</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Model Accuracy Gauge - Bigger Size -->
+                    <div class="flex flex-col items-center justify-center">
+                        <p class="text-sm font-semibold text-slate-500 mb-6">Model Accuracy</p>
+                        <div class="relative flex items-center justify-center w-72 h-72">
+                            <svg class="w-full h-full transform -rotate-90">
+                                <circle class="text-slate-100" cx="144" cy="144" r="120" fill="transparent"
+                                    stroke="currentColor" stroke-width="24"></circle>
+                                <circle class="text-accent" cx="144" cy="144" r="120" fill="transparent"
+                                    stroke="currentColor" stroke-width="24" stroke-dasharray="753.98"
+                                    stroke-dashoffset="3.4"></circle>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="text-center">
+                                    <p class="text-5xl font-bold text-slate-900">99.57%</p>
+                                    <p class="text-lg text-slate-500 mt-2">XGBoost</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confusion Matrix -->
+                    <div class="md:col-span-2 flex items-center justify-center bg-white rounded-xl p-4">
+                        <img src="/static/images/confusion_matrix.png" alt="XGBoost Confusion Matrix"
+                            class="max-w-full max-h-96 object-contain rounded-lg shadow-lg"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div style="display:none;"
+                            class="flex items-center justify-center bg-slate-50 rounded-xl p-6 h-full">
+                            <div class="text-center text-slate-400">
+                                <span class="material-symbols-outlined text-6xl mb-2">grid_on</span>
+                                <p class="text-sm">Confusion Matrix Image Not Found</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Importance - Centered -->
+                <div class="flex flex-col items-center justify-center bg-white rounded-xl p-6">
+                    <p class="text-lg font-semibold text-slate-700 mb-6">Feature Importance Analysis</p>
+                    <img src="/static/images/feature_importance.png" alt="Feature Importance Chart"
+                        class="max-w-4xl w-full max-h-96 object-contain rounded-lg shadow-lg"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display:none;" class="flex items-center justify-center bg-slate-50 rounded-xl p-6 h-40">
+                        <div class="text-center text-slate-400">
+                            <span class="material-symbols-outlined text-6xl mb-2">bar_chart</span>
+                            <p class="text-sm">Feature Importance Chart Not Found</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model Info Footer -->
+                <div class="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-slate-100">
+                    <div class="text-center">
+                        <p class="text-xs text-slate-500 mb-1">Model Type</p>
+                        <p class="font-bold text-slate-900">XGBoost Classifier</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-slate-500 mb-1">Training Date</p>
+                        <p class="font-bold text-slate-900">March 2026</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-slate-500 mb-1">Dataset Size</p>
+                        <p class="font-bold text-slate-900">6,963 records</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Statistics -->
+            <div class="card mb-6">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                    <span class="material-symbols-outlined text-accent text-3xl">database</span>
+                    <h3 class="text-2xl font-bold text-slate-800">Database Statistics</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table id="database-stats-table" data-source="/api/wards/statistics" class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-200">
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Ward
+                                    Name
+                                </th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Total
+                                    Beds</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">
+                                    Occupied
+                                </th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">
+                                    Available
+                                </th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">
+                                    Utilization %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-slate-100">
+                                <td class="py-3 px-4 font-semibold">ICU</td>
+                                <td class="py-3 px-4">20</td>
+                                <td class="py-3 px-4">18</td>
+                                <td class="py-3 px-4 text-green-600 font-bold">2</td>
+                                <td class="py-3 px-4">90%</td>
+                            </tr>
+                            <tr class="border-b border-slate-100">
+                                <td class="py-3 px-4 font-semibold">Cardiac Ward</td>
+                                <td class="py-3 px-4">40</td>
+                                <td class="py-3 px-4">35</td>
+                                <td class="py-3 px-4 text-green-600 font-bold">5</td>
+                                <td class="py-3 px-4">87.5%</td>
+                            </tr>
+                            <tr class="border-b border-slate-100">
+                                <td class="py-3 px-4 font-semibold">Cardiology Ward</td>
+                                <td class="py-3 px-4">30</td>
+                                <td class="py-3 px-4">22</td>
+                                <td class="py-3 px-4 text-green-600 font-bold">8</td>
+                                <td class="py-3 px-4">73.3%</td>
+                            </tr>
+                            <tr class="border-b border-slate-100">
+                                <td class="py-3 px-4 font-semibold">Endocrinology Ward</td>
+                                <td class="py-3 px-4">50</td>
+                                <td class="py-3 px-4">38</td>
+                                <td class="py-3 px-4 text-green-600 font-bold">12</td>
+                                <td class="py-3 px-4">76%</td>
+                            </tr>
+                            <tr class="border-b border-slate-100">
+                                <td class="py-3 px-4 font-semibold">Emergency Ward</td>
+                                <td class="py-3 px-4">25</td>
+                                <td class="py-3 px-4">20</td>
+                                <td class="py-3 px-4 text-green-600 font-bold">5</td>
+                                <td class="py-3 px-4">80%</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 font-semibold">General Ward</td>
+                                <td class="py-3 px-4">60</td>
+                                <td class="py-3 px-4">45</td>
+                                <td class="py-3 px-4 text-green-600 font-bold">15</td>
+                                <td class="py-3 px-4">75%</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="border-t-2 border-slate-300 bg-slate-50">
+                                <td class="py-3 px-4 font-bold">TOTAL</td>
+                                <td class="py-3 px-4 font-bold">224</td>
+                                <td class="py-3 px-4 font-bold">178</td>
+                                <td class="py-3 px-4 font-bold text-green-600">46</td>
+                                <td class="py-3 px-4 font-bold">79.5%</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-100">
+                    <div>
+                        <p class="text-xs text-slate-500 mb-1">Total Records</p>
+                        <p class="font-bold text-slate-900">1,247 patients</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 mb-1">Last Backup</p>
+                        <p class="font-bold text-slate-900">Today, 2:30 AM</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Queue Efficiency & System Health -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Queue Efficiency -->
+                <div class="card">
+                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                        <span class="material-symbols-outlined text-accent text-3xl">timer</span>
+                        <h3 class="text-xl font-bold text-slate-800">Queue Efficiency</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <p class="text-sm text-slate-600">Average Wait Time</p>
+                                <p class="font-bold text-slate-900">32.5 min</p>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full">
+                                <div class="bg-accent h-2 rounded-full" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <p class="text-sm text-slate-600">Critical Response (&lt;5 min)</p>
+                                <p class="font-bold text-green-600 flex items-center gap-1">
+                                    Yes
+                                    <span class="material-symbols-outlined text-lg">check_circle</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <p class="text-sm text-slate-600">Fairness Index</p>
+                                <p class="font-bold text-slate-900">0.89 / 1.0</p>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 89%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <p class="text-sm text-slate-600">Throughput</p>
+                                <p class="font-bold text-slate-900">12.4 patients/hour</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Health -->
+                <div class="card">
+                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                        <span class="material-symbols-outlined text-accent text-3xl">health_and_safety</span>
+                        <h3 class="text-xl font-bold text-slate-800">System Health</h3>
+                    </div>
+                    <div id="system-health-status" class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                                <p class="text-slate-700 font-medium">Server Status</p>
+                            </div>
+                            <span class="text-green-600 font-bold">Online</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                                <p class="text-slate-700 font-medium">Database Connection</p>
+                            </div>
+                            <span class="text-green-600 font-bold">Connected</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                                <p class="text-slate-700 font-medium">ML Model Status</p>
+                            </div>
+                            <span class="text-green-600 font-bold">Operational</span>
+                        </div>
+                        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                            <p class="text-sm text-slate-500">Last Updated</p>
+                            <p class="text-sm font-bold text-slate-700" id="last-updated-time">Just now</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-primary border-t border-white/10 py-8 px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-accent p-2 rounded-lg">
+                        <span class="material-symbols-outlined text-white text-xl">medical_services</span>
+                    </div>
+                    <div>
+                        <p class="text-white font-bold">Hospital Management System</p>
+                        <p class="text-slate-400 text-sm">AI-Powered Patient Care Platform</p>
+                    </div>
+                </div>
+                <div class="text-slate-400 text-sm text-center md:text-right">
+                    <p>© 2026 Hospital Management System</p>
+                    <p class="text-xs mt-1">99.57% ML Accuracy • 224 Beds • Real-Time Analytics</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Active nav link highlighting
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= (sectionTop - 100)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('text-white');
+                link.classList.add('text-slate-300');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.remove('text-slate-300');
+                    link.classList.add('text-white');
+                }
+            });
+        });
+
+        // Reset form function
+        function resetForm() {
+            document.getElementById('patient-admission-form').reset();
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('results-state').classList.add('hidden');
+            document.getElementById('result-status-badge').textContent = 'PENDING';
+            document.getElementById('result-status-badge').className = 'rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500';
+        }
+
+        // Close modal function
+        function closeModal() {
+            document.getElementById('patient-detail-modal').classList.add('hidden');
+        }
+
+        // Update last updated time
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('last-updated-time').textContent = now.toLocaleTimeString();
+        }, 60000);
+
+        // Initialize with current time
+        document.getElementById('last-updated-time').textContent = new Date().toLocaleTimeString();
+
+        console.log('Hospital Management System UI loaded successfully!');
+        console.log('Ready for Antigravity backend integration.');
+    </script>
+    <!-- Load main.js for API integration -->
+    <script src="/static/js/main.js"></script>
+</body>
+
+</html>

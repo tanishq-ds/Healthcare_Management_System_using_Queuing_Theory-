@@ -4,9 +4,7 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
 [![Flask](https://img.shields.io/badge/Flask-3.0-green.svg)](https://flask.palletsprojects.com/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-
 ![GitHub last commit](https://img.shields.io/github/last-commit/tanishq-ds/Healthcare_Management_System_using_Queuing_Theory-)
-![GitHub repo size](https://img.shields.io/github/repo-size/tanishq-ds/Healthcare_Management_System_using_Queuing_Theory-)
 
 
 ##  Tech Stack

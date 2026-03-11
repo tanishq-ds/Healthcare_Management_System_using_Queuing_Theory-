@@ -13,7 +13,7 @@ setup(
     description="ML-driven hospital management system with queuing theory",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/tanishq-ds/Hospital-Management-System-using-Queuing-theory",
+    url="https://github.com/tanishq-ds/Healthcare_Management_System_using_Queuing_Theory-",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

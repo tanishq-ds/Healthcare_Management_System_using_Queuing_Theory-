@@ -5,7 +5,6 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)](https://www.mysql.com/)
 [![Flask](https://img.shields.io/badge/Flask-3.0-green.svg)](https://flask.palletsprojects.com/)
 [![Plotly](https://img.shields.io/badge/Plotly-Interactive%20Dashboards-blueviolet.svg)](https://plotly.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ![ML Accuracy](https://img.shields.io/badge/Training%20Accuracy-99.57%25-brightgreen)
 ![Real World](https://img.shields.io/badge/Real--World%20Accuracy-66%25-orange)

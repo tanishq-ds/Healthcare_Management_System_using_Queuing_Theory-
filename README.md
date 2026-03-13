@@ -96,11 +96,9 @@ End-to-end hospital management system leveraging ML algorithms like Random Fores
 
 ## Dataset Setup
 
-⚠️ **Note:** CSV files are excluded from Git repository (see `.gitignore`)
+**Note:** CSV files are excluded from Git repository (see `.gitignore`)
 
-### Download Required Datasets
-
-This project uses two CSV files for ML training:
+This project uses two CSV datasets for ML training:
 
 1. **`patient_priority.csv`** (6,963 records)
    - Training data for ML ward prediction model
@@ -109,30 +107,35 @@ This project uses two CSV files for ML training:
 2. **`patients.csv`** (Patient demographics)
    - Patient ID, name, age, gender, admission date
 
-### Option 1: Generate Sample Data (For Testing)
+###  Important Note About Dataset Quality
+
+The training data used in this project is **synthetic** - created by combining publicly available heart disease and diabetes datasets with programmatically assigned ward labels. While this demonstrates the system architecture and ML pipeline effectively, **real-world deployment would require actual Electronic Health Record (EHR) data** with clinically validated ward assignments.
+
+**Current Performance:**
+- Training Accuracy: 99.57% (XGBoost on synthetic data)
+- Real-World Test Accuracy: ~66% (when tested with realistic patient profiles)
+
+This gap highlights a critical lesson: **data quality is more important than model complexity** in healthcare ML applications.
+
+### For Testing/Development
+
+You can generate sample synthetic data for testing:
 ```bash
 python scripts/generate_sample_data.py
 ```
 
-⚠️ Sample data is synthetic and will not produce accurate ML predictions.
+### For Production Deployment
 
-### Option 2: Use Your Own Data
+To deploy this system in a real hospital setting:
+1. Partner with healthcare institutions to obtain de-identified EHR data
+2. Work with medical professionals to validate ward assignment criteria
+3. Retrain models using actual patient admission records
+4. Implement clinical validation workflows
 
-If you have similar hospital patient data:
-1. Format your CSV files to match the schema (see `data/raw/README.md`)
-2. Place them in `data/raw/`
-3. Retrain models using `notebooks/model_training.ipynb`
+**Privacy Notice:** No real patient data is included in this repository. All data used is either synthetic or publicly available anonymized datasets.
 
-### Option 3: Contact Repository Owner
+Real-World Test Accuracy: ~66%
 
-For access to the original training datasets, contact: [tanishqverma4444@gmail.com]
-
----
-
-**Privacy Notice:** No real patient data is included in this repository.  
-All data used is either synthetic or publicly available anonymized datasets.
-
-**Note:** CSV files are excluded from the repository to keep it lightweight. Download them from Kaggle before running the notebooks.
 
 ##  Results
 

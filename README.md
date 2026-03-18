@@ -460,4 +460,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - Plotly for interactive visualizations
 - Healthcare professionals for domain insights
 
+# 👤 Author :-
+
+Engineered as an end-to-end machine learning system showcasing practical, production-level model deployment workflows.
+
 **⭐ If you found this project helpful, please consider giving it a star!**

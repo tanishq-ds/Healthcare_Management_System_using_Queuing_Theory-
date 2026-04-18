@@ -6,14 +6,14 @@ gunicorn==23.0.0
 # Database
 psycopg2-binary==2.9.11
 
-# ML Libraries (use compatible versions that have pre-built wheels)
+# ML Libraries - PREBUILT VERSIONS
 numpy==1.26.4
-scikit-learn==1.4.0
+scikit-learn==1.4.2
 xgboost==2.0.3
 joblib==1.3.2
 
-# Data Processing
-pandas==2.2.0
+# Data Processing - PREBUILT VERSION
+pandas==2.2.1
 
 # Visualization
 plotly==5.18.0

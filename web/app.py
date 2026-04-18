@@ -183,7 +183,7 @@ def get_queue_status():
     try:
         ward = request.args.get('ward', 'all')
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         
         query = """
             SELECT 
@@ -225,7 +225,7 @@ def get_queue_analytics():
     try:
         ward = request.args.get('ward', 'all')
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         
         # Build WHERE clause for ward filter
         ward_filter = ""
@@ -351,7 +351,7 @@ def search_patients():
         status = request.args.get('status', '')
         
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         
         query = """
             SELECT 
@@ -404,7 +404,7 @@ def get_patient(patient_id):
     """
     try:
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         
         cursor.execute("""
             SELECT 
@@ -440,7 +440,7 @@ def get_system_stats():
     """
     try:
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         
         cursor.execute("SELECT COUNT(*) as total FROM patients")
         total_patients = cursor.fetchone()['total']
@@ -479,7 +479,7 @@ def get_ward_statistics():
     """
     try:
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         
         cursor.execute("""
             SELECT 
@@ -503,12 +503,31 @@ def get_ward_statistics():
         if 'conn' in locals(): conn.close()
 
 
+# if __name__ == '__main__':
+#     print("\n" + "="*50)
+#     print("🏥 HOSPITAL MANAGEMENT SYSTEM")
+#     print("="*50)
+#     print("✅ Flask server starting...")
+#     print("✅ XGBoost model loaded (NO SCALER)")
+#     print("🌐 Visit: http://localhost:5000")
+#     print("="*50 + "\n")
+#     app.run(host='0.0.0.0', port=5000, debug=True)
+
 if __name__ == '__main__':
     print("\n" + "="*50)
     print("🏥 HOSPITAL MANAGEMENT SYSTEM")
     print("="*50)
     print("✅ Flask server starting...")
     print("✅ XGBoost model loaded (NO SCALER)")
-    print("🌐 Visit: http://localhost:5000")
+    
+    # Get port from environment variable (Render sets this)
+    port = int(os.getenv('PORT', 5000))
+    
+    print(f"🌐 Running on port: {port}")
     print("="*50 + "\n")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    
+    app.run(
+        host='0.0.0.0', 
+        port=port, 
+        debug=False  # Always False in production
+    )

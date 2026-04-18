@@ -1,5 +1,9 @@
 import mysql.connector
 from datetime import datetime
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from dotenv import load_dotenv
 
 def calculate_priority_score(patient_data):
     """
@@ -61,21 +65,31 @@ def calculate_priority_score(patient_data):
     return final_score
 
 
-def get_db_connection():
-    """Get MySQL database connection using .env credentials"""
-    import os
-    from dotenv import load_dotenv
+# def get_db_connection():
+#     """Get MySQL database connection using .env credentials"""
+#     import os
+#     from dotenv import load_dotenv
     
-    load_dotenv()
+#     load_dotenv()
     
-    return mysql.connector.connect(
-        host=os.getenv('DB_HOST'),
-        user=os.getenv('DB_USER'),
-        password=os.getenv('DB_PASSWORD'),
-        database=os.getenv('DB_NAME'),
-        port=int(os.getenv('DB_PORT', 3306))
-    )
+#     return mysql.connector.connect(
+#         host=os.getenv('DB_HOST'),
+#         user=os.getenv('DB_USER'),
+#         password=os.getenv('DB_PASSWORD'),
+#         database=os.getenv('DB_NAME'),
+#         port=int(os.getenv('DB_PORT', 3306))
+#     )
 
+def get_db_connection():
+    """Get PostgreSQL database connection"""
+    database_url = os.getenv('DATABASE_URL')
+    load_dotenv()
+    # Supabase/Render use postgresql:// but psycopg2 needs postgres://
+    if database_url and database_url.startswith('postgresql://'):
+        database_url = database_url.replace('postgresql://', 'postgres://', 1)
+    
+    conn = psycopg2.connect(database_url)
+    return conn
 
 def assign_to_queue(patient_id, ward_name, priority_score, ml_confidence):
     """
@@ -91,7 +105,7 @@ def assign_to_queue(patient_id, ward_name, priority_score, ml_confidence):
     - estimated_wait: int (minutes)
     """
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     
     try:
         # 1. Get ward details
@@ -217,7 +231,7 @@ def calculate_queue_metrics(ward_name=None):
     Used by /api/queue-analytics endpoint.
     """
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
     
     try:
         ward_filter = ""

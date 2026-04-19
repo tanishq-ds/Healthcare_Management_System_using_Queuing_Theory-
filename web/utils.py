@@ -1,4 +1,4 @@
-import mysql.connector
+# import mysql.connector
 from datetime import datetime
 import os
 import psycopg2
@@ -80,16 +80,31 @@ def calculate_priority_score(patient_data):
 #         port=int(os.getenv('DB_PORT', 3306))
 #     )
 
+# def get_db_connection():
+#     """Get PostgreSQL database connection"""
+#     database_url = os.getenv('DATABASE_URL')
+#     load_dotenv()
+#     # Supabase/Render use postgresql:// but psycopg2 needs postgres://
+#     if database_url and database_url.startswith('postgresql://'):
+#         database_url = database_url.replace('postgresql://', 'postgres://', 1)
+    
+#     conn = psycopg2.connect(database_url)
+#     return conn
+
 def get_db_connection():
     """Get PostgreSQL database connection"""
+    load_dotenv()  # Call this FIRST
     database_url = os.getenv('DATABASE_URL')
-    load_dotenv()
+    
+    if not database_url:
+        raise ValueError("No DATABASE_URL found in environment variables")
+
     # Supabase/Render use postgresql:// but psycopg2 needs postgres://
-    if database_url and database_url.startswith('postgresql://'):
+    if database_url.startswith('postgresql://'):
         database_url = database_url.replace('postgresql://', 'postgres://', 1)
     
-    conn = psycopg2.connect(database_url)
-    return conn
+    return psycopg2.connect(database_url)
+
 
 def assign_to_queue(patient_id, ward_name, priority_score, ml_confidence):
     """
@@ -130,7 +145,7 @@ def assign_to_queue(patient_id, ward_name, priority_score, ml_confidence):
         cursor.execute("""
             SELECT bed_id, bed_number 
             FROM beds 
-            WHERE ward_id = %s AND is_occupied = 0 
+            WHERE ward_id = %s AND is_occupied = FALSE 
             LIMIT 1
         """, (ward_id,))
         
@@ -191,7 +206,7 @@ def assign_to_queue(patient_id, ward_name, priority_score, ml_confidence):
         # 5. Mark bed as occupied
         cursor.execute("""
             UPDATE beds 
-            SET is_occupied = 1 
+            SET is_occupied = TRUE
             WHERE bed_id = %s
         """, (bed_id,))
         

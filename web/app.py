@@ -120,10 +120,21 @@ def predict_ward():
         cursor = conn.cursor()
         
         try:
+            # cursor.execute("""
+            #     INSERT INTO patients (patient_id, name, age, gender, status)
+            #     VALUES (%s, %s, %s, %s, %s)
+            #     ON DUPLICATE KEY UPDATE name = VALUES(name)
+            # """, (
+            #     patient_id,
+            #     data.get('name', 'Unknown'),
+            #     int(data.get('age', 0)),
+            #     data.get('gender', 'Male'),
+            #     'Active'
+            # ))
             cursor.execute("""
                 INSERT INTO patients (patient_id, name, age, gender, status)
                 VALUES (%s, %s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE name = VALUES(name)
+                ON CONFLICT (patient_id) DO UPDATE SET name = EXCLUDED.name
             """, (
                 patient_id,
                 data.get('name', 'Unknown'),

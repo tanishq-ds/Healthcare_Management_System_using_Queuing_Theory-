@@ -91,20 +91,41 @@ def calculate_priority_score(patient_data):
 #     conn = psycopg2.connect(database_url)
 #     return conn
 
+# def get_db_connection():
+#     """Get PostgreSQL database connection"""
+#     load_dotenv()  # Call this FIRST
+#     database_url = os.getenv('DATABASE_URL')
+    
+#     if not database_url:
+#         raise ValueError("No DATABASE_URL found in environment variables")
+
+#     # Supabase/Render use postgresql:// but psycopg2 needs postgres://
+#     # if database_url.startswith('postgresql://'):
+#     #     database_url = database_url.replace('postgresql://', 'postgres://', 1)
+#     if database_url and database_url.startswith('postgresql://'):
+#         database_url = database_url.replace('postgresql://', 'postgres://', 1)
+    
+#     return psycopg2.connect(database_url)
+
+
 def get_db_connection():
     """Get PostgreSQL database connection"""
-    load_dotenv()  # Call this FIRST
-    database_url = os.getenv('DATABASE_URL')
+    # Use a fallback to ensure the variable is read even if load_dotenv fails
+    database_url = os.environ.get('DATABASE_URL')
     
+    if not database_url:
+        # Try loading .env as a backup for local testing
+        load_dotenv()
+        database_url = os.getenv('DATABASE_URL')
+
     if not database_url:
         raise ValueError("No DATABASE_URL found in environment variables")
 
-    # Supabase/Render use postgresql:// but psycopg2 needs postgres://
+    # Critical: Convert for psycopg2 compatibility
     if database_url.startswith('postgresql://'):
         database_url = database_url.replace('postgresql://', 'postgres://', 1)
     
     return psycopg2.connect(database_url)
-
 
 def assign_to_queue(patient_id, ward_name, priority_score, ml_confidence):
     """

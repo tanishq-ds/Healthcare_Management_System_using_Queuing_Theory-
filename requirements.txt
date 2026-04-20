@@ -19,3 +19,6 @@ plotly==5.18.0
 
 # Utilities
 python-dotenv==1.0.1
+
+#sklearn
+scikit-learn==1.4.2

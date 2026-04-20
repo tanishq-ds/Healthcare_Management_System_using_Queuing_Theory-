@@ -5,6 +5,8 @@ from flask_cors import CORS
 import joblib
 import numpy as np
 from dotenv import load_dotenv
+from flask_cors import CORS
+from psycopg2.extras import RealDictCursor
 
 from utils import calculate_priority_score, assign_to_queue, get_db_connection
 

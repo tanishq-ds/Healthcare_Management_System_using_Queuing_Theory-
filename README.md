@@ -1,4 +1,4 @@
-# Hospital-Management-System-using-Queuing-theory
+.# Hospital-Management-System-using-Queuing-theory
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 [![XGBoost](https://img.shields.io/badge/XGBoost-99.57%25%20Accuracy-success.svg)](https://xgboost.readthedocs.io/)
